@@ -1,0 +1,149 @@
+export const formatDate = (date, options = {}) => {
+  const defaultOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    ...options,
+  };
+
+  return new Date(date).toLocaleDateString("uz-UZ", defaultOptions);
+};
+
+export const formatDateTime = (date) => {
+  return new Date(date).toLocaleString("uz-UZ", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+// Currency formatting
+export const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("uz-UZ").format(amount) + " so'm";
+};
+
+// Text truncation
+export const truncateText = (text, maxLength = 50) => {
+  if (text.length <= maxLength) return text;
+  return text.substr(0, maxLength) + "...";
+};
+
+// Debounce function
+export const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+// Validation helpers
+export const validateRequired = (value) => {
+  return value && value.toString().trim() !== "";
+};
+
+export const validateEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+};
+
+export const validatePhone = (phone) => {
+  const re = /^\+?[1-9]\d{8,14}$/;
+  return re.test(phone);
+};
+
+// Generate random string
+export const generateRandomString = (length = 8) => {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+// File size formatting
+export const formatFileSize = (bytes, decimals = 2) => {
+  if (bytes === 0) return "0 Bytes";
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+};
+
+// Copy to clipboard
+export const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    // Fallback for older browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      return true;
+    } catch (err) {
+      return false;
+    } finally {
+      document.body.removeChild(textArea);
+    }
+  }
+};
+
+// Local storage helpers
+export const storage = {
+  get: (key, defaultValue = null) => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+      console.error("Storage get error:", error);
+      return defaultValue;
+    }
+  },
+
+  set: (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (error) {
+      console.error("Storage set error:", error);
+      return false;
+    }
+  },
+
+  remove: (key) => {
+    try {
+      localStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      console.error("Storage remove error:", error);
+      return false;
+    }
+  },
+
+  clear: () => {
+    try {
+      localStorage.clear();
+      return true;
+    } catch (error) {
+      console.error("Storage clear error:", error);
+      return false;
+    }
+  },
+};
