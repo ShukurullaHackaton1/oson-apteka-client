@@ -5,6 +5,7 @@ import { useAuth } from "./hooks/useAuth";
 import Layout from "./components/Layout/Layout";
 import Login from "./pages/Login";
 import LoadingSpinner from "./components/UI/LoadingSpinner";
+import axios from "axios";
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
