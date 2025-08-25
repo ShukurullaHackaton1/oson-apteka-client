@@ -1,9 +1,11 @@
-// src/services/api.js - Добавляем новые API endpoints
+// src/services/api.js - Port va konfiguratsiya tuzatilgan
 import axios from "axios";
 import toast from "react-hot-toast";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_API_URL || "http://localhost:3003/api";
+
+console.log("🌐 API Base URL:", API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -20,18 +22,39 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Debug uchun
+    if (config.url?.includes("sync")) {
+      console.log(
+        `📡 API so'rov: ${config.method?.toUpperCase()} ${config.url}`
+      );
+    }
+
     return config;
   },
   (error) => {
+    console.error("❌ API so'rov xatoligi:", error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Debug uchun
+    if (response.config.url?.includes("sync")) {
+      console.log(`✅ API javob: ${response.status} ${response.config.url}`);
+    }
+    return response;
+  },
   (error) => {
     const message = error.response?.data?.message || "Неизвестная ошибка";
+
+    console.error("❌ API javob xatoligi:", {
+      status: error.response?.status,
+      url: error.config?.url,
+      message,
+    });
 
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
@@ -41,6 +64,10 @@ api.interceptors.response.use(
       toast.error("У вас нет прав для этого действия");
     } else if (error.response?.status >= 500) {
       toast.error("Ошибка сервера. Попробуйте позже.");
+    } else if (error.code === "ECONNREFUSED") {
+      toast.error("Нет соединения с сервером");
+    } else if (error.code === "ENOTFOUND") {
+      toast.error("Сервер не найден");
     }
 
     return Promise.reject(error);
@@ -51,6 +78,7 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (username, password) =>
     api.post("/auth/login", { username, password }),
+  register: (userData) => api.post("/auth/register", userData),
   verifyToken: () => api.get("/auth/verify"),
 };
 
@@ -104,14 +132,32 @@ export const salesAPI = {
 // Statistics API
 export const statisticsAPI = {
   getOverview: (params) => api.get("/statistics/overview", { params }),
-  getSyncStatus: () => api.get("/statistics/sync-status"),
-  manualSync: () => api.post("/statistics/sync/manual"),
+  getSyncStatus: () => api.get("/sync/status"),
+  manualSync: () => api.post("/sync/full"),
   getReports: (params) => api.get("/statistics/reports", { params }),
   exportData: (params) =>
     api.get("/statistics/export", {
       params,
       responseType: "blob",
     }),
+};
+
+// Sync API (yangi va asosiy)
+export const syncAPI = {
+  fromFrontend: (data) => {
+    console.log(
+      "📤 Frontend ma'lumoti yuborilmoqda:",
+      data.items?.length,
+      "ta element"
+    );
+    return api.post("/sync/from-frontend", { data });
+  },
+  fullSync: () => api.post("/sync/full"),
+  getStatus: () => api.get("/sync/status"),
+  getStatistics: () => api.get("/sync/statistics"),
+  testConnection: () => api.get("/sync/test"),
+  cleanup: (daysOld) => api.post("/sync/cleanup", { daysOld }),
+  stop: () => api.post("/sync/stop"),
 };
 
 // Dashboard API
@@ -146,6 +192,12 @@ export const reportsAPI = {
       { type, ...params },
       { responseType: "blob" }
     ),
+};
+
+// Health check
+export const healthAPI = {
+  check: () => api.get("/health"),
+  syncStatus: () => api.get("/sync-status"), // deprecated endpoint
 };
 
 export default api;

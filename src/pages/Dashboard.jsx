@@ -48,7 +48,7 @@ const Dashboard = () => {
 
   const statsCards = [
     {
-      title: "Bugungi sotuvlar",
+      title: "Продажи за сегодня",
       value: stats.today.totalSales,
       amount: formatCurrency(stats.today.totalAmount),
       icon: ShoppingCart,
@@ -56,21 +56,21 @@ const Dashboard = () => {
       bg: "bg-blue-50",
     },
     {
-      title: "Faol shifokorlar",
+      title: "Активные врачи",
       value: stats.totals.doctors,
       icon: Users,
       color: "text-green-600",
       bg: "bg-green-50",
     },
     {
-      title: "Dorilar soni",
+      title: "Количество лекарств",
       value: stats.totals.medicines,
       icon: Pill,
       color: "text-purple-600",
       bg: "bg-purple-50",
     },
     {
-      title: "Kam qolgan dorilar",
+      title: "Товары заканчиваются",
       value: stats.totals.lowStock,
       icon: AlertTriangle,
       color: "text-red-600",
@@ -78,15 +78,15 @@ const Dashboard = () => {
     },
   ];
 
-  // Sample chart data (bu yerda real ma'lumotlar bo'lishi kerak)
+  // Sample chart data (здесь должны быть реальные данные)
   const chartData = [
-    { name: "Dush", sotuvlar: 4000 },
-    { name: "Sesh", sotuvlar: 3000 },
-    { name: "Chor", sotuvlar: 2000 },
-    { name: "Pay", sotuvlar: 2780 },
-    { name: "Juma", sotuvlar: 1890 },
-    { name: "Shan", sotuvlar: 2390 },
-    { name: "Yak", sotuvlar: 3490 },
+    { name: "Пн", продажи: 4000 },
+    { name: "Вт", продажи: 3000 },
+    { name: "Ср", продажи: 2000 },
+    { name: "Чт", продажи: 2780 },
+    { name: "Пт", продажи: 1890 },
+    { name: "Сб", продажи: 2390 },
+    { name: "Вс", продажи: 3490 },
   ];
 
   return (
@@ -94,12 +94,14 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Umumiy ko'rsatkichlar va statistika</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Панель управления
+          </h1>
+          <p className="text-gray-600">Общие показатели и статистика</p>
         </div>
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <Calendar className="w-4 h-4" />
-          <span>{new Date().toLocaleDateString("uz-UZ")}</span>
+          <span>{new Date().toLocaleDateString("ru-RU")}</span>
         </div>
       </div>
 
@@ -141,7 +143,7 @@ const Dashboard = () => {
         >
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">
-              Haftalik sotuvlar
+              Недельные продажи
             </h3>
             <div className="flex items-center space-x-2 text-sm text-green-600">
               <TrendingUp className="w-4 h-4" />
@@ -155,11 +157,11 @@ const Dashboard = () => {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip
-                formatter={(value) => [formatCurrency(value), "Sotuvlar"]}
+                formatter={(value) => [formatCurrency(value), "Продажи"]}
               />
               <Line
                 type="monotone"
-                dataKey="sotuvlar"
+                dataKey="продажи"
                 stroke="#3b82f6"
                 strokeWidth={2}
                 dot={{ fill: "#3b82f6" }}
@@ -176,7 +178,7 @@ const Dashboard = () => {
           className="card"
         >
           <h3 className="text-lg font-semibold text-gray-900 mb-6">
-            Top shifokorlar (oy)
+            Топ врачи (за месяц)
           </h3>
 
           <div className="space-y-4">
@@ -201,7 +203,7 @@ const Dashboard = () => {
                   <p className="text-sm font-medium text-gray-900">
                     {doctor.totalSales}
                   </p>
-                  <p className="text-xs text-gray-500">sotuvlar</p>
+                  <p className="text-xs text-gray-500">продаж</p>
                 </div>
               </div>
             ))}
@@ -217,7 +219,7 @@ const Dashboard = () => {
         className="card"
       >
         <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          So'nggi sotuvlar
+          Последние продажи
         </h3>
 
         <div className="overflow-x-auto">
@@ -225,16 +227,16 @@ const Dashboard = () => {
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 text-sm font-medium text-gray-600">
-                  Shifokor
+                  Врач
                 </th>
                 <th className="text-left py-3 text-sm font-medium text-gray-600">
-                  Dorilar soni
+                  Количество лекарств
                 </th>
                 <th className="text-left py-3 text-sm font-medium text-gray-600">
-                  Summa
+                  Сумма
                 </th>
                 <th className="text-left py-3 text-sm font-medium text-gray-600">
-                  Vaqt
+                  Время
                 </th>
               </tr>
             </thead>
@@ -249,12 +251,12 @@ const Dashboard = () => {
                         </span>
                       </div>
                       <span className="text-sm font-medium text-gray-900">
-                        Dr. {sale.doctor?.firstName} {sale.doctor?.lastName}
+                        Др. {sale.doctor?.firstName} {sale.doctor?.lastName}
                       </span>
                     </div>
                   </td>
                   <td className="py-4 text-sm text-gray-600">
-                    {sale.medicines?.length} ta
+                    {sale.medicines?.length} шт
                   </td>
                   <td className="py-4 text-sm font-medium text-gray-900">
                     {formatCurrency(sale.totalAmount)}

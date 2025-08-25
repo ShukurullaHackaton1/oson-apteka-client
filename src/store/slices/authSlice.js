@@ -11,7 +11,7 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem("token", response.data.token);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Login xatosi");
+      return rejectWithValue(error.response?.data?.message || "Ошибка входа");
     }
   }
 );
@@ -23,15 +23,29 @@ export const checkAuth = createAsyncThunk(
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("Token topilmadi");
+        throw new Error("Токен не найден");
       }
 
-      // Token tekshirish API ga so'rov yuborish
-      const response = await authAPI.verifyToken();
-      return response.data;
+      // Простая проверка токена - проверяем срок действия
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const currentTime = Date.now() / 1000;
+
+      if (payload.exp < currentTime) {
+        localStorage.removeItem("token");
+        throw new Error("Токен истек");
+      }
+
+      // Если токен валидный, возвращаем данные пользователя
+      return {
+        user: {
+          id: payload.userId,
+          username: payload.username || "admin",
+          role: payload.role || "admin",
+        },
+      };
     } catch (error) {
       localStorage.removeItem("token");
-      return rejectWithValue("Token yaroqsiz");
+      return rejectWithValue("Токен недействителен");
     }
   }
 );
@@ -42,7 +56,7 @@ const authSlice = createSlice({
     user: null,
     token: localStorage.getItem("token"),
     isLoading: false,
-    isAuthenticated: false,
+    isAuthenticated: !!localStorage.getItem("token"),
     error: null,
   },
   reducers: {
@@ -51,9 +65,23 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       localStorage.removeItem("token");
+      localStorage.removeItem("osonKassaToken");
+      localStorage.removeItem("osonKassaTokenExpiry");
     },
     clearError: (state) => {
       state.error = null;
+    },
+    // Токен проверкасини бошлашда loading holatini o'rnatish
+    setAuthLoading: (state, action) => {
+      state.isLoading = action.payload;
+    },
+    // Токен мавжуд бўлганда authenticated ҳолатини ўрнатиш
+    setAuthenticated: (state) => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        state.isAuthenticated = true;
+        state.token = token;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -72,6 +100,7 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        state.isAuthenticated = false;
       })
       // Check auth
       .addCase(checkAuth.pending, (state) => {
@@ -91,5 +120,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, setAuthLoading, setAuthenticated } =
+  authSlice.actions;
 export default authSlice.reducer;

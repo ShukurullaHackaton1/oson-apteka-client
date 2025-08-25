@@ -6,11 +6,11 @@ export const formatDate = (date, options = {}) => {
     ...options,
   };
 
-  return new Date(date).toLocaleDateString("uz-UZ", defaultOptions);
+  return new Date(date).toLocaleDateString("ru-RU", defaultOptions);
 };
 
 export const formatDateTime = (date) => {
-  return new Date(date).toLocaleString("uz-UZ", {
+  return new Date(date).toLocaleString("ru-RU", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -19,13 +19,15 @@ export const formatDateTime = (date) => {
   });
 };
 
-// Currency formatting
+// Currency formatting для Узбекистана
 export const formatCurrency = (amount) => {
-  return new Intl.NumberFormat("uz-UZ").format(amount) + " so'm";
+  if (amount === null || amount === undefined) return "0 сум";
+  return new Intl.NumberFormat("ru-RU").format(amount) + " сум";
 };
 
 // Text truncation
 export const truncateText = (text, maxLength = 50) => {
+  if (!text) return "";
   if (text.length <= maxLength) return text;
   return text.substr(0, maxLength) + "...";
 };
@@ -71,11 +73,11 @@ export const generateRandomString = (length = 8) => {
 
 // File size formatting
 export const formatFileSize = (bytes, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
+  if (bytes === 0) return "0 байт";
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const sizes = ["байт", "КБ", "МБ", "ГБ", "ТБ", "ПБ", "ЭБ", "ЗБ", "ИБ"];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
@@ -146,4 +148,73 @@ export const storage = {
       return false;
     }
   },
+};
+
+// Status translation helpers
+export const translateStatus = (status) => {
+  const translations = {
+    active: "Активен",
+    inactive: "Неактивен",
+    pending: "Ожидание",
+    completed: "Завершено",
+    error: "Ошибка",
+    success: "Успешно",
+    failed: "Не удалось",
+    syncing: "Синхронизация",
+    idle: "Ожидание",
+  };
+  return translations[status] || status;
+};
+
+// Number formatting for large numbers
+export const formatLargeNumber = (num) => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + "М";
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + "К";
+  }
+  return num.toString();
+};
+
+// Time ago formatting
+export const timeAgo = (date) => {
+  const now = new Date();
+  const secondsAgo = Math.floor((now - new Date(date)) / 1000);
+
+  if (secondsAgo < 60) return "только что";
+  if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)} мин назад`;
+  if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)} ч назад`;
+  if (secondsAgo < 2592000) return `${Math.floor(secondsAgo / 86400)} дн назад`;
+
+  return formatDate(date);
+};
+
+// Generate color from string
+export const stringToColor = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = hash % 360;
+  return `hsl(${hue}, 70%, 50%)`;
+};
+
+// Percentage calculation
+export const calculatePercentage = (value, total) => {
+  if (total === 0) return 0;
+  return Math.round((value / total) * 100);
+};
+
+// Deep clone object
+export const deepClone = (obj) => {
+  return JSON.parse(JSON.stringify(obj));
+};
+
+// Check if object is empty
+export const isEmpty = (obj) => {
+  if (obj === null || obj === undefined) return true;
+  if (Array.isArray(obj)) return obj.length === 0;
+  if (typeof obj === "object") return Object.keys(obj).length === 0;
+  if (typeof obj === "string") return obj.trim() === "";
+  return false;
 };

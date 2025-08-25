@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navigation = [
     { name: "Панель управления", href: "/", icon: Home },
     { name: "Статистика", href: "/statistics", icon: BarChart3 },
-    { name: "Доктора", href: "/doctors", icon: UserCheck },
+    { name: "Врачи", href: "/doctors", icon: UserCheck },
     { name: "Поставщики", href: "/suppliers", icon: Package },
     { name: "Товары", href: "/products", icon: Database },
     { name: "Продажи", href: "/sales", icon: ShoppingCart },
